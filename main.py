@@ -29,6 +29,12 @@ def get_int_value_default(_config: dict, _key, default):
 
 # 获取当前时间对应的最大和最小步数
 def get_min_max_by_time(hour=None, minute=None):
+    fixed_step = config.get('FIXED_STEP')
+    if fixed_step not in (None, ''):
+        step = int(fixed_step)
+        if step <= 0:
+            raise ValueError('FIXED_STEP 必须是正整数')
+        return step, step
     if hour is None:
         hour = time_bj.hour
     if minute is None:
@@ -254,9 +260,10 @@ def execute():
         summary = f"\n执行账号总数{total}，成功：{success_count}，失败：{total - success_count}"
         print(summary)
         push_util.push_results(push_results, summary, push_config)
+        return success_count == total
     else:
         print(f"账号数长度[{len(user_list)}]和密码数长度[{len(passwd_list)}]不匹配，跳过执行")
-        exit(1)
+        return False
 
 
 def prepare_user_tokens() -> dict:
@@ -314,6 +321,7 @@ if __name__ == "__main__":
             "PWD": os.environ.get("PWD"),
             "MIN_STEP": os.environ.get("MIN_STEP", "18000"),
             "MAX_STEP": os.environ.get("MAX_STEP", "25000"),
+            "FIXED_STEP": os.environ.get("FIXED_STEP", ""),
             "PUSH_PLUS_TOKEN": os.environ.get("PUSH_PLUS_TOKEN", ""),
             "PUSH_PLUS_HOUR": os.environ.get("PUSH_PLUS_HOUR", ""),
             "PUSH_PLUS_MAX": os.environ.get("PUSH_PLUS_MAX", "30"),
@@ -343,8 +351,8 @@ if __name__ == "__main__":
     sleep_seconds = float(sleep_seconds)
     users = config.get('USER')
     passwords = config.get('PWD')
-    if users is None or passwords is None:
-        print("未正确配置账号密码，无法执行")
+    if not users or not passwords:
+        print("未填写 Zepp Life 账号或密码。")
         exit(1)
     min_step, max_step = get_min_max_by_time()
     use_concurrent = config.get('USE_CONCURRENT')
@@ -354,4 +362,5 @@ if __name__ == "__main__":
         print(f"多账号执行间隔：{sleep_seconds}")
         use_concurrent = False
     # endregion
-    execute()
+    if not execute():
+        raise SystemExit(1)
