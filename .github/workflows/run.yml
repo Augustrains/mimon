@@ -33,6 +33,31 @@ jobs:
             exit 1
           fi
           base64 --decode cloud_encrypted_tokens.b64 > encrypted_tokens.data
+      - name: 检查缓存账号
+        env:
+          USER: ${{ secrets.ZEPP_USER || secrets.USER }}
+          AES_KEY: ${{ secrets.ZEPP_AES_KEY }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          from util.aes_help import decrypt_data
+          with open('encrypted_tokens.data', 'rb') as cache_file:
+              encrypted = cache_file.read()
+          try:
+              cached = json.loads(decrypt_data(encrypted, os.environ['AES_KEY'].encode(), None))
+          except Exception:
+              print('加密缓存无法解密，请核对 ZEPP_AES_KEY')
+              sys.exit(1)
+          account = os.environ['USER']
+          if not account.startswith('+86') and '@' not in account:
+              account = '+86' + account
+          if account not in cached:
+              print('加密缓存与 ZEPP_USER 不匹配，请核对账号 Secret')
+              sys.exit(1)
+          print('加密缓存与账号匹配')
+          PY
       - name: 提交固定步数
         env:
           CONFIG: ${{ secrets.CONFIG }}
