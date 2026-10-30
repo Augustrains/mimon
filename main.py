@@ -354,6 +354,10 @@ if __name__ == "__main__":
     sleep_seconds = float(sleep_seconds)
     users = config.get('USER')
     passwords = config.get('PWD')
+    if isinstance(users, str):
+        users = users.strip()
+    if isinstance(passwords, str):
+        passwords = passwords.rstrip('\r\n')
     if not users or not passwords:
         print("未填写 Zepp Life 账号或密码。")
         exit(1)
