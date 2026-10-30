@@ -4,6 +4,7 @@ on:
   schedule:
     # 00:00 UTC = 北京时间 08:00
     - cron: '0 0 * * *'
+    - cron: '2 9 * * *' # temporary test on 2026-10-30 17:02 Beijing time
   workflow_dispatch:
   push:
     branches: [master] # temporary cloud test trigger
