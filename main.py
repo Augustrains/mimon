@@ -308,7 +308,7 @@ if __name__ == "__main__":
         else:
             print("AES_KEY未设置或者无效 无法使用加密保存功能")
     config = dict()
-    if "CONFIG" in os.environ:
+    if os.environ.get("CONFIG"):
         try:
             config = dict(json.loads(os.environ.get("CONFIG")))
         except:
@@ -334,6 +334,9 @@ if __name__ == "__main__":
     else:
         print("未配置CONFIG或USER/PWD环境变量，无法执行。请在本地创建.env文件或配置环境变量。")
         exit(1)
+
+    if os.environ.get("FIXED_STEP"):
+        config["FIXED_STEP"] = os.environ["FIXED_STEP"]
 
     # region 初始化参数
     # 创建推送配置对象
