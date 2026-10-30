@@ -50,7 +50,7 @@ jobs:
           except Exception:
               print('加密缓存无法解密，请核对 ZEPP_AES_KEY')
               sys.exit(1)
-          account = os.environ['USER']
+          account = os.environ['USER'].strip()
           if not account.startswith('+86') and '@' not in account:
               account = '+86' + account
           if account not in cached:
