@@ -5,6 +5,12 @@ on:
     # 00:00 UTC = 北京时间 08:00
     - cron: '0 0 * * *'
   workflow_dispatch:
+    inputs:
+      step_count:
+        description: '本次手动提交的步数'
+        required: true
+        default: '10000'
+        type: string
 
 permissions:
   contents: write
@@ -64,7 +70,7 @@ jobs:
           USER: ${{ secrets.ZEPP_USER || secrets.USER }}
           PWD: ${{ secrets.ZEPP_PWD || secrets.PWD }}
           AES_KEY: ${{ secrets.ZEPP_AES_KEY }}
-          FIXED_STEP: '10000'
+          FIXED_STEP: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.step_count || '10000' }}
         run: python main.py
       - name: 保存更新后的加密令牌
         run: |
